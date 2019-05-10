@@ -13,4 +13,9 @@ int main(){  /*main Tester della classe Handler*/
 
 	char z = byte -> compareBitsLSB('c' , '+' , 1);
 	printf("%c\n",z);
+
+
+	FILE* text = fopen("testo.txt");
+	int cd = byte -> generateKey(text);
+	printf("%d\n",cd);
 }
