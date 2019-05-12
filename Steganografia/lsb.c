@@ -1,7 +1,7 @@
 #include "Byte_Handler.hpp"
 #define MAX_INT_POINTS 250
 
-int* getPoints(int, ByteHandler* );
+int* getPoints(int);
 
 int* get_points_log();
 
@@ -27,6 +27,7 @@ int main(int argc , char** argv){
 	FILE* second_image;
 	FILE* text;
 
+	ByteHandler* byte = new ByteHandler();
 	if(modality){  /*Modalita di Encode , metto nell'immagine il messaggio*/
 		printf("Encode...\n");
 		if(argc != 5){
@@ -38,7 +39,7 @@ int main(int argc , char** argv){
 			printf("Error: Can't open the SourceImage\n");
 			return -2;
 		}
-		second_image = fopen(argv[3],"wb");
+		second_image = fopen(argv[3],"w+"); /*sia read and write*/
 		if(second_image == NULL){
 			printf("Error: Can't create/write the DestinationImage\n");
 			return -3;
@@ -50,7 +51,7 @@ int main(int argc , char** argv){
 		}
 
 
-		ByteHandler* byte = new ByteHandler();
+		
 		int dataOffset = byte-> getImageDataOffset(first_image);
 		char bufferFirst;
 		char bufferSecond;
@@ -62,7 +63,6 @@ int main(int argc , char** argv){
 			bufferFirst = fgetc(first_image);
 			fputc(bufferFirst,second_image);
 		}
-
 		
 		
 
@@ -74,16 +74,11 @@ int main(int argc , char** argv){
 		printf("Lunghezza del testo: %d\n",textLength);
 
 
-		int* points = getPoints(textLength,byte);
+		int* points = getPoints(textLength);
 
 		fseek(second_image,dataOffset,0);
 		fputc(points[0],second_image);
 
-
-		
-		fseek(second_image,dataOffset,0);
-		bufferFirst = fgetc(second_image);
-		printf("%d",(int)bufferFirst);
 
 		printf("\n%d",dataOffset);
 
@@ -91,13 +86,16 @@ int main(int argc , char** argv){
 
 		fseek(second_image,points[1]+dataOffset,SEEK_SET);
 		fseek(text,0,SEEK_SET);
-		for(int i = dataOffset ; i < imageLength; i+=8){
+		int count = 2;
+		for(int i = dataOffset+1 ; i < imageLength; i+=8){
 			if(!feof(text)){
+				bufferSecond = fgetc(second_image);
 				bufferText = fgetc(text);
-				for(int j = 0; j<8 ; j++){
+				for(int j = 1; j<=8 ; j++){
 					char bufferSecondMod = byte -> compareBitsLSB(bufferSecond , bufferText , j);
 					fputc(bufferSecondMod,second_image);
-					fseek(second_image,points[j+i]+dataOffset,SEEK_SET);
+					fseek(second_image,points[count],dataOffset);
+					count++;
 					bufferSecond = fgetc(second_image);
 				}
 			}else{
@@ -135,14 +133,49 @@ int main(int argc , char** argv){
 		}
 		fseek(first_image,10,SEEK_SET);
 		int dataOffset = fgetc(first_image);
-		printf("%d\n",dataOffset);
+		printf("Dove iniziano i dati: %d\n",dataOffset);
 
 		fseek(first_image , dataOffset, SEEK_SET);
 		int textLength = (int)fgetc(first_image);
-		printf("%d",textLength);
+		printf("Lunghezza del tsto: %d\n",textLength);
+
+		int imageLength = byte -> getLength(first_image);
 
 
-		
+
+
+		int* points = getPoints(textLength);
+
+		int count = 1;
+		int offsetText = 0;
+		int loop = 0;
+		char buffRead;
+		char result = 0b00000000;
+		char* finalresult = (char*)malloc(sizeof(char)*textLength);
+
+		printf("OK\n");
+		fflush(stdout);
+
+		for(int i = dataOffset+1 ; i < imageLength ; i++){
+			if(i == points[count]+dataOffset){
+				fseek(first_image,points[count],dataOffset);
+				count++;
+				buffRead = fgetc(first_image);
+				int bit = byte -> getBit(buffRead,1);
+				printf("%d\n",bit);
+				byte -> changeBit(result,8-loop,bit);
+				loop++;
+				if(loop == 7){
+					finalresult[offsetText] = result;
+					offsetText ++;
+					fputc(result,text);
+					printf("%c\n",result);
+					result = 0b00000000;
+					loop = 0;
+				}
+			}
+		}
+		printf("%s\n",finalresult);		
 
 		fclose(first_image);
 	 	fclose(text);
@@ -151,7 +184,7 @@ int main(int argc , char** argv){
 
 
 
-int* getPoints(int length,ByteHandler* byte){ /*restituisce la porenza di 2 , è una semplice funzione che ti da la potenza di 2*/
+int* getPoints(int length){ /*restituisce la porenza di 2 , è una semplice funzione che ti da la potenza di 2*/
 	/*int* tmp = (int*)malloc(sizeof(int)*MAX_INT_POINTS);
 	for(int i = 0; i < MAX_INT_POINTS ; i++){
 		int c = i;
@@ -163,9 +196,9 @@ int* getPoints(int length,ByteHandler* byte){ /*restituisce la porenza di 2 , è
 		tmp[i]=res;
 	}
 	return tmp;*/
-	int* points = (int*)malloc(sizeof(int)*length);
+	int* points = (int*)malloc(sizeof(int)*length*8);
 	points[0] = length;
-	for(int i = 1 ; i< length; i++){
+	for(int i = 1 ; i< length*8; i++){
 		points[i] = i;
 	}
 	return points;
