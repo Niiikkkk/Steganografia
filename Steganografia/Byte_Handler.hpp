@@ -40,7 +40,7 @@ char ByteHandler::changeBit(char byte ,int pos, int flag){  /*prende il byte , c
 	return mod_byte;
 }
 
-char ByteHandler::compareBitsLSB(char first, char second , int pos_first){  /*mette nell'ultimo bit della seconda il primo bit dell' first*/
+char ByteHandler::compareBitsLSB(char first, char second , int pos_first){  /*mette nell'ultimo bit della seconda il pos_first bit dell' first*/
 	char buff_second = second;
 	int bit_first = getBit(first , pos_first);  /*8-pos perchè se faccio un for lui va da 0 a n , quindi 8 - pos*/
 	int bit_second = getBit(second , 1);

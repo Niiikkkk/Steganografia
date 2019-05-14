@@ -59,7 +59,7 @@ int main(int argc , char** argv){
 		int textLength = 0;
 		int firstLength = byte -> getLength(first_image);
 		printf("Lunghezza della prima immagine: %d\n",firstLength);
-		for(int i = 0 ; i< firstLength ; i++){  /*Copia l'header e i dati nella seconda immagine*/
+		for(int i = 0 ; i< dataOffset ; i++){  /*Copia l'header e i dati nella seconda immagine*/
 			bufferFirst = fgetc(first_image);
 			fputc(bufferFirst,second_image);
 		}
@@ -79,29 +79,93 @@ int main(int argc , char** argv){
 		fseek(second_image,dataOffset,0);
 		fputc(points[0],second_image);
 
+		fseek(second_image,dataOffset,0);
+		printf("%d\n",fgetc(second_image));
+
 
 		printf("\n%d",dataOffset);
 
 		printf("Lunghezza massima : %d\n",points[0]);
 
-		fseek(second_image,points[1]+dataOffset,SEEK_SET);
+		int count = 1;
 		fseek(text,0,SEEK_SET);
-		int count = 2;
-		for(int i = dataOffset+1 ; i < imageLength; i+=8){
-			if(!feof(text)){
-				bufferSecond = fgetc(second_image);
-				bufferText = fgetc(text);
-				for(int j = 1; j<=8 ; j++){
-					char bufferSecondMod = byte -> compareBitsLSB(bufferSecond , bufferText , j);
+		int loop = 0;
+		bufferText = fgetc(text);
+		for(int i = dataOffset+1; i < firstLength; i++){
+			fseek(first_image,i,SEEK_SET);
+			char c = fgetc(first_image);
+			if(i == points[count]+dataOffset){
+				if(!feof(text)){
+					
+					for(int i = 0; i <8 ; i++){
+						printf("%d", byte->getBit(c,8-i));
+					}
+
+					printf(" Text:%d  ",byte-> getBit(bufferText,8-loop));
+					printf("Last bit img before modify:%d   ",byte-> getBit(c,1));
+
+
+					char bufferSecondMod = byte -> compareBitsLSB(bufferText,c, 8-loop);
+					printf("Last bit img after modify:%d    ",byte-> getBit(bufferSecondMod,1));
+					fseek(second_image,i,dataOffset);
 					fputc(bufferSecondMod,second_image);
-					fseek(second_image,points[count],dataOffset);
+
+					for(int i = 0; i <8 ; i++){
+						printf("%d", byte->getBit(bufferSecondMod,8-i));
+					}
+
+					fseek(second_image,i,dataOffset);
+
+					printf(" Image:");
+					for(int i = 0; i <8 ; i++){
+						printf("%d", byte->getBit(fgetc(second_image),8-i));
+					}
+					printf("\n");
+
+					if(loop == 7){
+						printf("Byte finito\n\n\n");
+						loop = 0;
+						bufferText = fgetc(text);						
+					}else
+						loop++;
 					count++;
-					bufferSecond = fgetc(second_image);
+					
+				}else{
+					count = 0;
 				}
 			}else{
-				i = imageLength;
+				fputc(c,second_image);
 			}
 		}
+		
+		/*while(!feof(text)){
+			bufferText = fgetc(text);
+			for(int j = 0; j<=7 ; j++){
+				fseek(first_image,points[count],dataOffset);
+				bufferSecond = fgetc(first_image);
+
+				printf("Text:%d\n",byte-> getBit(bufferText,8-j));
+				printf("Image first modify:%d\n",byte-> getBit(bufferSecond,1));
+
+
+				char bufferSecondMod = byte -> compareBitsLSB(bufferText,bufferSecond , 8-j);
+				printf("Image after modify:%d\n",byte-> getBit(bufferSecondMod,1));
+				fseek(second_image,points[count],dataOffset);
+				fputc(bufferSecondMod,second_image);
+
+
+				fseek(second_image,points[count],dataOffset);
+				bufferSecond = fgetc(second_image);
+
+
+				printf("Image:%d\n\n",byte-> getBit(bufferSecond,1));
+				count++;
+			}
+		}*/
+
+		fseek(second_image,points[1],dataOffset);
+		char c = fgetc(second_image);
+		printf("%d\n",byte-> getBit(c,1));
 
 
 
@@ -156,20 +220,19 @@ int main(int argc , char** argv){
 		printf("OK\n");
 		fflush(stdout);
 
-		for(int i = dataOffset+1 ; i < imageLength ; i++){
+		for(int i = dataOffset; i < imageLength ; i++){
 			if(i == points[count]+dataOffset){
 				fseek(first_image,points[count],dataOffset);
 				count++;
 				buffRead = fgetc(first_image);
+				printf("First image:%d\n",byte->getBit(buffRead,1));
 				int bit = byte -> getBit(buffRead,1);
-				printf("%d\n",bit);
-				byte -> changeBit(result,8-loop,bit);
+				result = byte -> changeBit(result,8-loop,bit);
 				loop++;
 				if(loop == 7){
 					finalresult[offsetText] = result;
 					offsetText ++;
 					fputc(result,text);
-					printf("%c\n",result);
 					result = 0b00000000;
 					loop = 0;
 				}
