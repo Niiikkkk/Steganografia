@@ -13,6 +13,7 @@ class ByteHandler{
 		int generateKey(FILE*);
 		int getLength(FILE*);
 		int getImageDataOffset(FILE*);
+		void printByte(char);
 	private:
 		/*PASS*/
 };
@@ -68,4 +69,10 @@ int ByteHandler::getImageDataOffset(FILE* bmp_offset) {
 	int offset;
 	offset=(int)fgetc(bmp_offset);
 	return offset;
+}
+
+void ByteHandler::printByte(char c){
+	for(int i = 0; i < 8 ; i++){
+		printf("%d",getBit(c,8-i));
+	}
 }

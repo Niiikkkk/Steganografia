@@ -3,8 +3,6 @@
 
 int* getPoints(int);
 
-int* get_points_log();
-
 int main(int argc , char** argv){
 	if(argc < 2 || argc > 5){
 		printf("***Steganografia***\nUSAGE : %s [-e]/[-d] and see istructions\n",*argv);
@@ -39,7 +37,7 @@ int main(int argc , char** argv){
 			printf("Error: Can't open the SourceImage\n");
 			return -2;
 		}
-		second_image = fopen(argv[3],"w+"); /*sia read and write*/
+		second_image = fopen(argv[3],"wb+"); /*sia read and write*/
 		if(second_image == NULL){
 			printf("Error: Can't create/write the DestinationImage\n");
 			return -3;
@@ -91,52 +89,51 @@ int main(int argc , char** argv){
 		fseek(text,0,SEEK_SET);
 		int loop = 0;
 		bufferText = fgetc(text);
-		for(int i = dataOffset+1; i < firstLength; i++){
-			fseek(first_image,i,SEEK_SET);
+		char bufferSecondMod = 0b00000000;
+		fseek(first_image,dataOffset,SEEK_SET);
+		for(int i = dataOffset; i < firstLength; i++){			
 			char c = fgetc(first_image);
 			if(i == points[count]+dataOffset){
 				if(!feof(text)){
-					
-					for(int i = 0; i <8 ; i++){
-						printf("%d", byte->getBit(c,8-i));
-					}
+					printf("Byte IMG BEFORE:");
+					byte -> printByte(c);
 
 					printf(" Text:%d  ",byte-> getBit(bufferText,8-loop));
 					printf("Last bit img before modify:%d   ",byte-> getBit(c,1));
 
 
-					char bufferSecondMod = byte -> compareBitsLSB(bufferText,c, 8-loop);
+					bufferSecondMod = byte -> compareBitsLSB(bufferText,c, 8-loop);
 					printf("Last bit img after modify:%d    ",byte-> getBit(bufferSecondMod,1));
-					fseek(second_image,i,dataOffset);
+					fseek(second_image,i,SEEK_SET);
 					fputc(bufferSecondMod,second_image);
 
-					for(int i = 0; i <8 ; i++){
-						printf("%d", byte->getBit(bufferSecondMod,8-i));
-					}
-
-					fseek(second_image,i,dataOffset);
+					printf("Byte IMG AFTER:");
+					byte -> printByte(bufferSecondMod);
+					fseek(second_image,i,SEEK_SET);
+					char s = fgetc(second_image);
 
 					printf(" Image:");
-					for(int i = 0; i <8 ; i++){
-						printf("%d", byte->getBit(fgetc(second_image),8-i));
-					}
+					byte -> printByte(s);
 					printf("\n");
 
 					if(loop == 7){
 						printf("Byte finito\n\n\n");
 						loop = 0;
 						bufferText = fgetc(text);						
-					}else
+					}else{
 						loop++;
+					}
 					count++;
 					
 				}else{
+
 					count = 0;
 				}
 			}else{
 				fputc(c,second_image);
 			}
 		}
+		printf("\n\n%d\n\n",count);
 		
 		/*while(!feof(text)){
 			bufferText = fgetc(text);
@@ -190,7 +187,7 @@ int main(int argc , char** argv){
 			printf("Error: Can't open the SourceImage\n");
 			return -2;
 		}
-		text = fopen(argv[3],"wb");
+		text = fopen(argv[3],"w");
 		if(text == NULL){
 			printf("Error: Can't open the text\n");
 			return -4;
@@ -220,24 +217,32 @@ int main(int argc , char** argv){
 		printf("OK\n");
 		fflush(stdout);
 
+
 		for(int i = dataOffset; i < imageLength ; i++){
 			if(i == points[count]+dataOffset){
-				fseek(first_image,points[count],dataOffset);
-				count++;
+				fseek(first_image,i,SEEK_SET);			
 				buffRead = fgetc(first_image);
-				printf("First image:%d\n",byte->getBit(buffRead,1));
+
+				printf("Byte:");
+				byte -> printByte(buffRead);
+				printf("\n");
+
+				//printf("First image:%d\n",byte->getBit(buffRead,1));
 				int bit = byte -> getBit(buffRead,1);
 				result = byte -> changeBit(result,8-loop,bit);
-				loop++;
 				if(loop == 7){
 					finalresult[offsetText] = result;
 					offsetText ++;
 					fputc(result,text);
 					result = 0b00000000;
 					loop = 0;
-				}
+					printf("\n\n");
+				}else
+					loop++;
+				count++;			
 			}
 		}
+		printf("%d\n",count);
 		printf("%s\n",finalresult);		
 
 		fclose(first_image);
@@ -259,15 +264,10 @@ int* getPoints(int length){ /*restituisce la porenza di 2 , è una semplice funz
 		tmp[i]=res;
 	}
 	return tmp;*/
-	int* points = (int*)malloc(sizeof(int)*length*8);
+	int* points = (int*)malloc(sizeof(int)*length*8+1);  /*+1 perchè la 0 è già occupata della length*/
 	points[0] = length;
-	for(int i = 1 ; i< length*8; i++){
+	for(int i = 1 ; i< length*8+1; i++){
 		points[i] = i;
 	}
 	return points;
 }
-
-/*int* get_points_log(){
-	int* tmp = (int*)malloc(sizeof(int)*MAX_INT_POINTS);
-	for
-}*/
