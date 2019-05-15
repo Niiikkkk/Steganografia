@@ -1,14 +1,14 @@
-#include "class.hpp"
+#include "ByteHandler.hpp"
 
 int main(){  /*main Tester della classe Handler*/
-	Byte_Handler* byte = new Byte_Handler();
+	ByteHandler* byte = new ByteHandler();
 
 	int r = byte -> getBit('c' , 6);  /*01100011 = c*/
 
 	printf("%d\n",r);
 
 
-	char c = byte -> changeBit('c' , 3 , 1);
+	char c = byte -> changeBit('c' , 1 , 0);
 	printf("%c\n",c);
 
 	char z = byte -> compareBitsLSB('c' , 'g' , 2);
