@@ -87,10 +87,9 @@ int* ByteHandler::getPoints(int textLength,int imgLength,int num){
 	}
 	int* points = (int*)malloc(sizeof(int)*textLength*8+2);  /*+2 perchè la 0 è già occupata della length*/
 	points[0] = textLength;
-	printf("NUM : %d\n",num);
 	points[1] = num;
 	int m = 1;
-	int q = 2;
+	int q = 16; //16 è la somma di 2 byte, nel primo c'è la textLength , nel scendno NUM , quindi non devo toccarli oppure perdo il loro valore
 	int res = 0;
 	int preRes = 0;
 	int n = 1;
@@ -100,11 +99,8 @@ int* ByteHandler::getPoints(int textLength,int imgLength,int num){
 			res = preRes+n;
 			n++;
 		}
-		/*if(i == q*2){
-			m++;
-			q++;
-		}*/
 		num++;
+		m++;
 		preRes = res;
 		points[i] = res;
 		printf("%d ",res);
