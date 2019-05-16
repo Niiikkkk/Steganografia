@@ -3,6 +3,9 @@
 class Steganografia{
 	public:
 		virtual void run() = 0;
+		virtual void setText()  = 0;
+		virtual void setOrignialImage() = 0;
+		virtual void setDestImage() = 0;
 };
 
 
@@ -10,6 +13,9 @@ class Encript: public Steganografia{
 	public:
 		int encript(int,char**);
 		void run();
+		void setText();
+		void setOrignialImage();
+		void setDestImage();
 	private:
 		ByteHandler* byte = NULL;
 };
@@ -157,6 +163,9 @@ class Decript: public Steganografia{
 	public:
 		int decript(int,char**);
 		void run();
+		void setText();
+		void setOrignialImage();
+		void setDestImage();
 	private:
 		ByteHandler* byte = NULL;
 };

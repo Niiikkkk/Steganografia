@@ -19,6 +19,7 @@ int main(int argc , char** argv){
 			return -2;
 		}
 		s -> setState(new Encript());
+		s-> setDestImage(argv[3]);
 	}
 	if(!strcmp(argv[1],DECRIPT)){
 		if(argc != 4){
@@ -27,6 +28,10 @@ int main(int argc , char** argv){
 		}
 		s -> setState(new Decript());
 	}
+
+	s-> setText(argv[4]);
+	s-> setOriginalImage(argv[2]);
+
 
 
 	s -> exec();
