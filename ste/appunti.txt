@@ -1,0 +1,4 @@
+
+data = readfile()
+encrypted data = encrypt(data,text)
+writefile(encrypted data)

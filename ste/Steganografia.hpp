@@ -3,6 +3,7 @@
 class Steganografia{
 	public:
 		virtual int run() = 0;
+		virtual void getHeader() = 0;
 };
 
 
@@ -276,3 +277,7 @@ int Decript::run(){
 
  	return 0;
 }
+
+class EncriptBitMap:public Encript{
+	void 
+};
