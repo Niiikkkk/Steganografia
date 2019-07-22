@@ -1,9 +1,9 @@
-#include "class.hpp"
+#include "ByteHandler.hpp"
 
 int main(){  /*main Tester della classe Handler*/
-	Byte_Handler* byte = new Byte_Handler();
+	ByteHandler* byte = new ByteHandler();
 
-	int r = byte -> getBit('c' , 1);  /*01100011 = c*/
+	int r = byte -> getBit('c' , 6);  /*01100011 = c*/
 
 	printf("%d\n",r);
 
@@ -11,11 +11,8 @@ int main(){  /*main Tester della classe Handler*/
 	char c = byte -> changeBit('c' , 1 , 0);
 	printf("%c\n",c);
 
-	char z = byte -> compareBitsLSB('c' , '+' , 1);
+	char z = byte -> compareBitsLSB('c' , 'g' , 2);
 	printf("%c\n",z);
+	printf("%d\n",byte->getBit(z,1));
 
-
-	FILE* text = fopen("testo.txt");
-	int cd = byte -> generateKey(text);
-	printf("%d\n",cd);
 }
